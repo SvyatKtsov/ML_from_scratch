@@ -4,7 +4,7 @@
 
 
 def relu(x: float): 
-    return max(0, x)
+    return max([0, x])
 
 def leaky_relu(): pass
 def sigmoid(): pass
@@ -50,17 +50,18 @@ print(hidden_layer)
 
 ## hidden_layer_neurons + bias
 ### '...bias terms are additional constants attached to neurons and added to the weighted input before the activation function is applied'
-for s in range(len(hidden_layer)):
+for sample in range(len(hidden_layer)):
     for b_indx, b in enumerate(biases):
-        hidden_layer[s][b_indx] += b
-
+        hidden_layer[sample][b_indx] += b
 print(hidden_layer)
 
 
 
 ## applying an activation function
-# ...
-
+for sample in range(len(hidden_layer)):
+    for neuron in range(len(hidden_layer[0])): 
+        hidden_layer[sample][neuron] = relu(hidden_layer[sample][neuron])
+print(f"hidden_layer after applying an activation function to W * x + b: {hidden_layer}\n")
 
 
 ## multiplying hidden_layer * last_weights 
