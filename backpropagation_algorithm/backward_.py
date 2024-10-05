@@ -2,16 +2,20 @@
 ## without any libraries
 # forward -> calculate the loss -> backward by the derivatives
 
+import math 
+
 
 def relu(x: float): 
     return max([0, x])
 
-def leaky_relu(): pass
-def sigmoid(): pass
-def tanh(): pass
-def cross_entropy(): pass
+def leaky_relu(x: float, neg_slope=0.3): return x if x>=0 else neg_slope*x
 
-act_functions = [relu, leaky_relu, sigmoid, tanh, cross_entropy]
+def sigmoid(x: float): return 1/ (1 + math.exp(-x))
+
+def tanh(x: float): return (math.exp(x)-math.exp(-x) / math.exp(x)+math.exp(-x))
+
+
+act_functions = [relu, leaky_relu, sigmoid, tanh]
 
 inp, y_real = [[-235, 7, 24, 14, 1, 9, 6.235], 
                [-240, 5.45, 16, 12.24, 0.25, 8.234, -12.364], 
@@ -58,7 +62,7 @@ print(hidden_layer)
 
 
 
-## applying an activation function
+## applying relu 
 for sample in range(len(hidden_layer)):
     for neuron in range(len(hidden_layer[0])): 
         hidden_layer[sample][neuron] = relu(hidden_layer[sample][neuron])
@@ -82,8 +86,34 @@ for hidden_layer_row in range(len(hidden_layer)):
 print(f"\n hidden layer neurons (3x4) * last_weights (4x1): {result_matrix_y_pred}\n")
 
 
+## applying leaky relu
+for sample in range(len(result_matrix_y_pred)):
+    for neuron in range(len(result_matrix_y_pred[0])): 
+        result_matrix_y_pred[sample][neuron] = leaky_relu(result_matrix_y_pred[sample][neuron])
+print(f"result_matrix_y_pred after applying tanh(x) to it: {result_matrix_y_pred}\n")
 
 
-### calculating the loss (y_real - y_pred)**2
+### calculating the loss 
 loss_error = [(y_real_i-y_pred_i[0])**2 for y_real_i, y_pred_i in zip(y_real, result_matrix_y_pred) ]
 print(f"loss error for every sample: {loss_error} \n")
+
+
+
+
+
+### using derivaives, going backward
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
