@@ -5,14 +5,22 @@
 import math 
 
 
-def relu(x: float): 
-    return max([0, x])
+def relu(x: float): return max([0, x])
+def derivative_relu(x: float): return 1 if x>=0 else 0
 
 def leaky_relu(x: float, neg_slope=0.3): return x if x>=0 else neg_slope*x
+def derivative_leaky_relu(x: float, neg_slope: 0.3): 1 if x>=0 else neg_slope
 
 def sigmoid(x: float): return 1/ (1 + math.exp(-x))
 
 def tanh(x: float): return (math.exp(x)-math.exp(-x) / math.exp(x)+math.exp(-x))
+
+
+def MSE_costF(y_real, y_predicted):
+    return (y_real-y_predicted)**2
+
+def derivative_MSE_costF(y_real, y_predicted):
+    return 2*(y_real-y_predicted)
 
 
 act_functions = [relu, leaky_relu, sigmoid, tanh]
@@ -90,26 +98,37 @@ print(f"\n hidden layer neurons (3x4) * last_weights (4x1): {result_matrix_y_pre
 for sample in range(len(result_matrix_y_pred)):
     for neuron in range(len(result_matrix_y_pred[0])): 
         result_matrix_y_pred[sample][neuron] = leaky_relu(result_matrix_y_pred[sample][neuron])
-print(f"result_matrix_y_pred after applying tanh(x) to it: {result_matrix_y_pred}\n")
+print(f"result_matrix_y_pred after applying leaky_relu(x) to it: {result_matrix_y_pred}\n")
 
 
-### calculating the loss 
-loss_error = [(y_real_i-y_pred_i[0])**2 for y_real_i, y_pred_i in zip(y_real, result_matrix_y_pred) ]
-print(f"loss error for every sample: {loss_error} \n")
+
+### calculating the loss (MSE)
+#loss_error = [(y_real_i-y_pred_i[0])**2 for y_real_i, y_pred_i in zip(y_real, result_matrix_y_pred) ]
+loss_error = MSE_costF(...)
+print(f"loss (average): {sum(loss_error)/len(loss_error)} \n")
 
 
 
 
 
 ### using derivaives, going backward
+# derLosserror_derlastlayer = derivative_leaky_relu(loss_error)
+# der_lastlayer = derLosserror_derlastlayer * 
+
+dE_dloss = derivative_MSE_costF(result_matrix_y_pred)
+dloss_hidd2 = derivative_leaky_relu(result_matrix_y_pred)  ## derivative of leaky_relu w.r.t its input
+dhidd2_weights2 = #*derivative of 'multiplying hidden_layer * last_weights' w.r.t. dloss_hidd2
+## d(wx+b)/dw + d(wx+b)/db
+
+dhidd1postactf_dhidd1preactf = derivative_relu(hidden_layer) ## derivative of relu w.r.t its input (input*w+b)
+dhidd1preactf_dweights1 = #*derivative of 'multiplying input*first_weights' w.r.t. dhidd1postactf_dhidd1preactf
+## d(wx+b)/dw + d(wx+b)/db
 
 
 
 
 
-
-
-
+## updating the weights using an optimization algorithm like Adam or Stochastic Gradient Descent
 
 
 
