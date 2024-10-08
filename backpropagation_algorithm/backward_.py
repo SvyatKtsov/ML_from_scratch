@@ -127,7 +127,7 @@ for epoch in range(epochs):
                   zip(y_real, result_matrix_y_pred)]
     dE_dloss = [dE_dloss]
     assert len(dE_dloss)>0, 'len(lst) must be > 0'
-    print(dE_dloss)
+    print(f"dE_dloss: {dE_dloss}")
                   
 
 
@@ -138,25 +138,27 @@ for epoch in range(epochs):
             dloss_dhidd2[sample][neuron] = derivative_leaky_relu(result_matrix_y_pred[sample][neuron])
     print(f"dloss_dhidd2: {dloss_dhidd2}")
 
-    #dhidd2_weights2 = ... #*derivative of 'multiplying hidden_layer * last_weights' w.r.t. its input
+    #dhidd2_dweights2 = ... #*derivative of 'multiplying hidden_layer * last_weights' w.r.t. its input
     ## d(wx+b)/dw + d(wx+b)/db
     ### x + 1
     #### hidden_layer_preRelu + 1  (or hidden_layer(post relu) + 1   ??)
     ##### answer: use post activ.function (that is, hidden_layer(post relu) (or just hidden_layer))
     ###### so we'll have:
     #dhidd2_weights2 = hidden_layer + 1
-    dhidd2_weights2 = [[0 for _ in range(len(hidden_layer[0]))] for _ in range(len(hidden_layer))]
+    dhidd2_dweights2 = [[0 for _ in range(len(hidden_layer[0]))] for _ in range(len(hidden_layer))]
     for sample in range(len(hidden_layer)): 
         for neuron in range(len(hidden_layer[0])): 
-            dhidd2_weights2[sample][neuron] = hidden_layer[sample][neuron]+1
-    #print(dhidd2_weights2)
+            dhidd2_dweights2[sample][neuron] = hidden_layer[sample][neuron]+1
+    print(f"hidden_layer before: {hidden_layer}")
+    print(f"dhidd2_dweights2: {dhidd2_dweights2}")
+
 
     #dhidd1postactf_dhidd1= derivative_relu(hidden_layer) ## derivative of relu w.r.t its input
     dhidd1postactf_dhidd1 = [[0 for _ in range(len(hidden_layer[0]))] for _ in range(len(hidden_layer))]
     for sample in range(len(hidden_layer)): # hidden_layer
         for neuron in range(len(hidden_layer[0])): 
             dhidd1postactf_dhidd1[sample][neuron] = derivative_relu(hidden_layer[sample][neuron])
-
+    print(f"dhidd1postactf_dhidd1: {dhidd1postactf_dhidd1}")
 
     dhidd1_dweights1 = ... #*derivative of 'multiplying input*first_weights' w.r.t. its input
     ## d(wx+b)/dw + d(wx+b)/db
@@ -164,13 +166,14 @@ for epoch in range(epochs):
     #### inp + 1
     ##### so we'll have:
     #dhidd1postactf_dhidd1actf_dweights1 = inp + 1
-    dhidd1postactf_dhidd1actf_dweights1 = [[0 for _ in range(len(inp[0]))] for _ in range(len(inp))]
+    dhidd1_dweights1 = [[0 for _ in range(len(inp[0]))] for _ in range(len(inp))]
     for sample in range(len(inp)): # inp
         for neuron in range(len(inp[0])): 
-            dhidd1postactf_dhidd1actf_dweights1[sample][neuron] = inp[sample][neuron]+1
-    print(f"dhidd1postactf_dhidd1actf_dweights1: {dhidd1postactf_dhidd1actf_dweights1}")
+            dhidd1_dweights1[sample][neuron] = inp[sample][neuron]+1
+    print(f"dhidd1_dweights1: {dhidd1_dweights1}")
 
-    dhidd1_dbiases = 1 
+    #dhidd1_dbiases = 1 
+    dhidd1_dbiases = [[1], [1], [1], [1]]
     # d(wx+b)/d(b)==1 (because b is a constant (...number...))
 
 
@@ -179,7 +182,7 @@ for epoch in range(epochs):
 
     print(f"dE_dloss: {dE_dloss}")
     print(f"dloss_dhidd2: {dloss_dhidd2}")
-    #dE_dweights2 = dE_dloss * dloss_dhidd2 * dhidd2_weights2
+    #dE_dweights2 = dE_dloss * dloss_dhidd2 * dhidd2_dweights2
     by_dloss_dhidd2 = [] # by_dloss_dhidd2
     for i in range(len(dE_dloss)):
         row = []
@@ -193,19 +196,19 @@ for epoch in range(epochs):
     print(f"by_dloss_dhidd2:{by_dloss_dhidd2}")
 
     dE_dweights2 = []
-    for i in range(len(dE_dloss)):
+    for i in range(len(by_dloss_dhidd2)):
         row = []
-        for j in range(len(dloss_dhidd2[0])):
+        for j in range(len(dhidd2_dweights2[0])):
 
             dot=0
-            for k in range(len(dE_dloss[0])):
-                dot += dE_dloss[i][k]*dloss_dhidd2[k][j]
+            for k in range(len(by_dloss_dhidd2[0])):
+                dot += by_dloss_dhidd2[i][k]*dhidd2_dweights2[k][j]
             row.append(dot)
         dE_dweights2.append(row)
 
 
 
-    #dE_dweights1 = dE_dloss * dloss_dhidd2 * dhidd2_weights2 * dhidd1postactf_dhidd1 * dhidd1_dweights1
+    #dE_dweights1 = dE_dloss * dloss_dhidd2 * dhidd2_dweights2 * dhidd1postactf_dhidd1 * dhidd1_dweights1
     print(f"\ndE_dweights2:{dE_dweights2}")
     print(f"dhidd1postactf_dhidd1:{dhidd1postactf_dhidd1}")
 
@@ -220,13 +223,15 @@ for epoch in range(epochs):
         row.append(dot)
      result_next.append(row)       
 
+    print(f"result_next: {result_next}")
+    print(f"dhidd1_dweights1: {dhidd1_dweights1}")
     dE_dweights1 = []
     for i in range(len(result_next)):
         row = []
         for j in range(len(dhidd1_dweights1[0])):
 
             dot=0
-            for k in range(len(result_next[0])):
+            for k in range(len(result_next)): # should be 'for k in range(len(result_next[0])):'
                 dot += result_next[i][k]*dhidd1_dweights1[k][j]
             row.append(dot)
         dE_dweights1.append(row)
@@ -235,51 +240,44 @@ for epoch in range(epochs):
 
 
     #dE_biases = dE_dloss * dloss_dhidd2 * dhidd2_weights2 * dhidd1postactf_dhidd1 * dhidd1_dbiases
-    #dE_biases = []
-    by_dhidd1 = []
-    for i in range(len(dE_dweights2)):
-        row = []
-        for j in range(len(dhidd1postactf_dhidd1[0])):
-
-            dot=0
-            for k in range(len(dE_dweights2[0])):
-                dot += dE_dweights2[i][k]*dhidd1postactf_dhidd1[k][j]
-            row.append(dot)
-        by_dhidd1.append(row)
-
     dE_biases = []
-    for i in range(len(by_dhidd1)):
+    for i in range(len(result_next)):
         row = []
         for j in range(len(dhidd1_dbiases[0])):
 
             dot=0
-            for k in range(len(by_dhidd1[0])):
-                dot += by_dhidd1[i][k]*dhidd1_dbiases[k][j]
+            for k in range(len(result_next[0])):
+                dot += result_next[i][k]*dhidd1_dbiases[k][j]
             row.append(dot)
         dE_biases.append(row)
 
 
 
-    ## updating the weights using an optimization algorithm like Adam or Stochastic Gradient Descent
 
-    #first_weights = first_weights - learning_rate * dE_dweights1
-    #first_weights = []
-    for i in range(len(dE_dweights1)):
-        for j in range(len(dE_dweights1[0])):
-            first_weights[i][j] = first_weights[i][j] - learning_rate * dE_dweights1[i][j]
+
+    ## updating the weights using an optimization algorithm like Adam or Stochastic Gradient Descent
+    print(f"dE_dweights2: {dE_dweights2}") # should be of shape 4x1 (same as its layer's shape (4x1))
+    print(f"dE_dweights1: {dE_dweights1}") # should be of shape 7x4 (same as its layer's shape (7x4))
+
+    # for i in range(len(last_weights)):
+    #     for j in range(len(last_weights[0])):
+    #         last_weights[i][j] -= learning_rate * dE_dweights2[i][j]
+    last_weights = [[last_weights[i][0]-learning_rate*dE_dweights2[0][i]] for i in range(len(last_weights))]
+
     
 
-    #biases = biases - learning_rate * dE_biases
-    #biases = []
-    for i in range(len(dE_biases)):    
-        biases[i] = biases[i] - learning_rate * dE_biases[i]
+    print(f"dE_dweights1: {dE_dweights1}") # should be of shape 7x4 (same as its layer's shape (7x4))
+    # for i in range(len(first_weights)):
+    #     for j in range(len(first_weights[0])):
+    #         first_weights[i][j] -= learning_rate * dE_dweights1[i][j]
+    first_weights = [ [first_weights[i][j] - learning_rate * dE_dweights1[0][i] for j in range(len(first_weights[i]))] for i in range(len(first_weights))]
 
-
-    #last_weights = last_weights - learning_rate * dE_dweights2
-    #last_weights = []
-    for i in range(len(dE_dweights2)):
-        for j in range(len(dE_dweights2[0])):
-            last_weights[i][j] = last_weights[i][j] - learning_rate * dE_dweights2[i][j]
+    # Updating biases
+    print(f"biases: {biases}")
+    print(f"dE_biases: {dE_biases}")
+    # for i in range(len(biases)):
+    #     biases[i] -= learning_rate * dE_biases[i][0]
+    biases = [biases[i]-learning_rate*dE_biases[0][0] for i in range(len(biases))]
 
     print('=============================================')
     
