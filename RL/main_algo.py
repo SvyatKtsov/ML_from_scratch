@@ -9,7 +9,7 @@ grid = [[-1, -1, -1, -1], # rewards for each unique state (s1...s12)
         [-1, -4, -1, -1], 
         [-1, -1, 6.4, 30]]
 
-grid_enumerate = []
+grid_enumerate = [] 
 s, e = 1, len(grid[0]) + 1
 for _ in range(len(grid)):
     grid_enumerate.append([*range(s, e)])
